@@ -346,15 +346,14 @@
         <p>Y después iremos a comer donde tú quieras. Esta vez invito yo a todito. No será mi plan ni mis antojos. Quiero que sea tu momento y compartir algo distinto contigo.</p>
         <p>También quiero que recuerdes algo:</p>
         <p>Sin importar si a veces me notas rara, callada o pensando demasiado, hay algo que no cambia: te amo muchísimo.</p>
-        <p>Sentir esto por alguien nunca me había pasado.</p>
         <p class="highlight">Y si pudiera elegir una y otra vez, te elegiría. En esta vida y en las que sigan.</p>
-        <p>Porque cuando pienso en el futuro, me haces sentir segura.</p>
-        <p>Y últimamente… soy muy feliz contigo ❤️</p>
+        <p>Porque amo sentir de todo por ti, me haces sentir segura.</p>
+        <p>Y últimamente… soy muy feliz, estoy más motivada y te lo agradezco mi amor.. Un besitooo</p>
       </div>
       <div class="letter-divider"><span>🌿</span></div>
       <div class="letter-details">
-        <div class="letter-detail-item">📍 <strong>Sábado 30 de mayo</strong></div>
-        <div class="letter-detail-item">✨ Código de vestimenta: <strong>ponte bien lindo</strong></div>
+        <div class="letter-detail-item">📍 <strong>Sábado 30 de mayo, por la tarde</strong></div>
+        <div class="letter-detail-item">✨ Código de vestimenta: <strong>ponte bien lindo y cómodo</strong></div>
       </div>
     </div>
     <div class="btn-accept-wrap">
@@ -368,9 +367,9 @@
   <div class="s3-inner">
     <p class="s1-eyebrow" style="animation: fadeUp 0.8s ease both;">ya es oficial</p>
     <h2 class="s3-main">Entonces ya es<br>una cita 💛</h2>
-    <p class="s3-sub">fin de la página</p>
+
   </div>
-  <div class="wandering-bee" id="wanderingBee">🐝</div>
+
 </div>
 
 <script>
@@ -594,26 +593,101 @@ document.getElementById('btnYes').addEventListener('click', (e)=>{
 });
 
 /* ─── ACCEPT → SCREEN 3 ─── */
-document.getElementById('btnAccept').addEventListener('click', ()=>{
+document.getElementById('btnAccept').addEventListener('click', (e)=>{
+  const r = e.currentTarget.getBoundingClientRect();
+  burstHearts(r.left + r.width/2, r.top + r.height/2);
+
   const ov = document.getElementById('overlay');
   ov.classList.add('active');
   setTimeout(()=>{
     showScreen('s3');
     ov.style.transition = 'opacity 0.7s ease';
     ov.classList.remove('active');
-    setTimeout(()=>{ ov.style.transition = ''; startWanderingBee(); }, 700);
+    setTimeout(()=>{ ov.style.transition = ''; startBeeFiesta(); }, 700);
   }, 500);
 });
 
-/* ─── WANDERING BEE ─── */
-function startWanderingBee(){
-  const bee = document.getElementById('wanderingBee');
-  bee.style.left = window.innerWidth/2 + 'px';
-  bee.style.top  = window.innerHeight*0.75 + 'px';
-  setInterval(()=>{
-    bee.style.left = (20 + Math.random()*(window.innerWidth-60))  + 'px';
-    bee.style.top  = (20 + Math.random()*(window.innerHeight-60)) + 'px';
-  }, 3200);
+/* ─── BEE FIESTA — screen 3 ─── */
+// DOM bees that wander smoothly
+const domBees = [];
+const BEE_COUNT = 22;
+
+function makeDomBee(delayMs){
+  const el = document.createElement('div');
+  el.textContent = '🐝';
+  el.style.cssText = `
+    position:fixed; z-index:20; pointer-events:none;
+    font-size:${rnd(14,32)}px;
+    left:${rnd(0, window.innerWidth-40)}px;
+    top:${rnd(0, window.innerHeight-40)}px;
+    opacity:0;
+    filter: drop-shadow(0 2px 4px rgba(216,183,93,0.4));
+    transition: left ${rnd(2.5,5)}s cubic-bezier(0.45,0.05,0.55,0.95),
+                top  ${rnd(2.5,5)}s cubic-bezier(0.45,0.05,0.55,0.95),
+                opacity 0.6s ease;
+    will-change: left, top;
+  `;
+  document.getElementById('s3').appendChild(el);
+
+  setTimeout(()=>{
+    el.style.opacity = rnd(0.55, 1);
+    wander(el);
+  }, delayMs);
+
+  domBees.push(el);
+}
+
+function wander(el){
+  // re-pick destination and re-set transition duration each time
+  const dur = rnd(2.2, 5.5);
+  el.style.transitionDuration = `${dur}s, ${dur}s, 0.6s`;
+  el.style.left = rnd(5, window.innerWidth  - 50) + 'px';
+  el.style.top  = rnd(5, window.innerHeight - 50) + 'px';
+  // schedule next move after this one finishes (+ tiny jitter)
+  setTimeout(()=> wander(el), dur * 1000 + rnd(0, 600));
+}
+
+// Burst bees that fly in from centre on entry
+function burstBees(){
+  const cx = window.innerWidth/2;
+  const cy = window.innerHeight/2;
+  for(let i = 0; i < 30; i++){
+    const el = document.createElement('div');
+    el.textContent = '🐝';
+    const sz = rnd(12, 28);
+    el.style.cssText = `
+      position:fixed; z-index:25; pointer-events:none;
+      font-size:${sz}px;
+      left:${cx}px; top:${cy}px;
+      opacity:1;
+      animation: beeBurst${i} ${rnd(0.9,1.8)}s ease-out forwards;
+    `;
+    const angle = (Math.PI*2/30)*i + rnd(-0.1,0.1);
+    const dist  = rnd(80, Math.min(window.innerWidth, window.innerHeight)*0.55);
+    const tx = Math.cos(angle)*dist;
+    const ty = Math.sin(angle)*dist;
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes beeBurst${i} {
+        0%   { transform:translate(0,0) scale(0.3) rotate(0deg);   opacity:1; }
+        70%  { opacity:0.9; }
+        100% { transform:translate(${tx}px,${ty}px) scale(1) rotate(${rnd(-180,180)}deg); opacity:0; }
+      }
+    `;
+    document.head.appendChild(style);
+    document.body.appendChild(el);
+    setTimeout(()=>{ el.remove(); style.remove(); }, 2000);
+  }
+}
+
+function startBeeFiesta(){
+  burstBees();
+  // Spawn wandering bees staggered so they don't all appear at once
+  for(let i = 0; i < BEE_COUNT; i++){
+    makeDomBee(i * 80 + rnd(0, 120));
+  }
+  // Also pump up canvas bees count for screen 3
+  for(let i = 0; i < 18; i++) cbees.push(new CBee());
 }
 </script>
 </body>
